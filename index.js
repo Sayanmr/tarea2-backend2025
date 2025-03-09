@@ -3,17 +3,28 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import morgan from "morgan";
 import usersRouter from "./routers/users/users-router.js";
-import ProductsRouter from "./routers/products/product-router.js";
+import { Database } from "./database/db.js";
+import productsRouter from "./routers/products/products-router.js";
+import { SocketHandler } from "./sockets/socket.js";
+import http from "http";
 
 const app = express();
+const server = http.createServer(app);
+
+const database = new Database();
+database.setup();
 
 app.use(cors());
 app.use(morgan());
 app.use(bodyParser());
 
-app.use("/users", usersRouter);
-app.use("/products",ProductsRouter);
+app.use("/api/users", usersRouter);
+app.use("/api/products", productsRouter);
 
-app.listen(8000, () => {
-    console.log("App running on port 8000");
-});
+new SocketHandler(server);
+
+// app.listen(8000, () => {
+// });
+
+server.listen(8000);
+console.log("App running on port 8000");

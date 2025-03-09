@@ -2,31 +2,18 @@ import Users from "./users-entity.js";
 import bcrypt from "bcrypt";
 import { configDotenv } from "dotenv";
 import jwt from "jsonwebtoken";
-import Valkey from "iovalkey";
 
 configDotenv();
-const cache = new Valkey();
+
 export const GetAllUsers = async (req, res) => {
     try {
-        let users = await cache.get("users");
-        users = JSON.parse(users);
-        if (users) {
-            return res.status(200).json({
-                data: users,
-            });
-        }
-
-        users = await Users.findAll();
-        await cache.set("users", JSON.stringify(users), "EX", 10);
-
+        const users = await Users.findAll();
         return res.status(200).json({
             data: users,
         });
     } catch (error) {
         console.log(error);
-        return res
-            .status(503)
-            .json({ data: "No se pudo obtener los usuarios" });
+        return res.status(503).json({ data: "No se pudo obtener los usuarios" });
     }
 };
 
@@ -75,6 +62,7 @@ export const UpdateUser = async (req, res) => {
         });
     }
 };
+
 export const DeleteUser = async (req, res) => {
     const { id } = req.params;
     try {
